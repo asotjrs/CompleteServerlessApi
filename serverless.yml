@@ -5,6 +5,13 @@ frameworkVersion: "3"
 provider:
   name: aws
   runtime: nodejs12.x
+  environment:
+    tableName: ${self:custom.tableName}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "*"
 
 plugins:
   - serverless-s3-sync
@@ -14,16 +21,24 @@ package:
   individually: true
 
 custom:
+  tableName: player-points
   s3Sync:
     - bucketName: theveryuniqslsbcktproj
       localDir: UploadData
 
 functions:
   getUser:
-    handler: lambdas/getUser.handler
+    handler: lambdas/endpoints/getUser.handler
     events:
       - http:
           path: get-user/{ID}
+          method: GET
+          cors: true
+  getPlayerScore:
+    handler: lambdas/endpoints/getPlayerScore.handler
+    events:
+      - http:
+          path: get-player-score/{ID}
           method: GET
           cors: true
 
@@ -33,3 +48,14 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: theveryuniqslsbcktproj
+    MyDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST

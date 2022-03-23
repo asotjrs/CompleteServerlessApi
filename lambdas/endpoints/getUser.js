@@ -1,5 +1,5 @@
 'use strict'
-const Responses=require("./API_Responses")
+const Responses=require("../common/API_Responses")
 exports.handler = async event => {
     console.log(event)
    
