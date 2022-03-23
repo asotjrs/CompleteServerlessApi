@@ -24,6 +24,26 @@ const Dynamo={
             return data.Item
 
 
+        },
+        async write(data,TableName){
+
+            if(!data.ID){
+                    throw new Error("data passed with no ID")
+            }
+
+            const params= {
+                TableName,
+                Item:data
+            }
+            
+            const res = await documentClient.put(params).promise();
+            if (!res) {
+                throw new Error(`There was an error inserting ID of ${data.ID} in table ${TableName}`);
+            }
+
+
+            return data;
+
         }
 
 }
