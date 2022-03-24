@@ -7,10 +7,12 @@ provider:
   runtime: nodejs12.x
   environment:
     tableName: ${self:custom.tableName}
+    bucketName: ${self:custom.bucketName}
   iamRoleStatements:
     - Effect: Allow
       Action:
         - dynamodb:*
+        - s3:*
       Resource: "*"
 
 plugins:
@@ -22,8 +24,9 @@ package:
 
 custom:
   tableName: player-points
+  bucketName: theveryuniqslsbcktproj
   s3Sync:
-    - bucketName: theveryuniqslsbcktproj
+    - bucketName: ${self:custom.bucketName}
       localDir: UploadData
 
 functions:
@@ -48,13 +51,27 @@ functions:
           path: create-player-score/{ID}
           method: POST
           cors: true
+  createFile:
+    handler: lambdas/endpoints/createFile.handler
+    events:
+      - http:
+          path: create-file/{fileName}
+          method: POST
+          cors: true
+  getFile:
+    handler: lambdas/endpoints/getFile.handler
+    events:
+      - http:
+          path: get-file/{fileName}
+          method: GET
+          cors: true
 
 resources:
   Resources:
     DemoBucketUpload:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: theveryuniqslsbcktproj
+        BucketName: ${self:custom.bucketName}
     MyDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
