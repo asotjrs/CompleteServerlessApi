@@ -14,6 +14,27 @@ provider:
         - dynamodb:*
         - s3:*
       Resource: "*"
+  apiGateway:
+    apiKeys:
+      - free:
+          - myFreeAPIKey
+      - paid:
+          - myPaidAPIKey
+    usagePlan:
+      - free:
+          quota:
+            limit: 10
+            period: MONTH
+          throttle:
+            rateLimit: 3
+            burstLimit: 6
+      - paid:
+          quota:
+            limit: 20
+            period: MONTH
+          throttle:
+            rateLimit: 6
+            burstLimit: 12
 
 plugins:
   - serverless-s3-sync
@@ -37,6 +58,7 @@ functions:
           path: get-user/{ID}
           method: GET
           cors: true
+          private: true
   getPlayerScore:
     handler: lambdas/endpoints/getPlayerScore.handler
     events:
@@ -65,6 +87,27 @@ functions:
           path: get-file/{fileName}
           method: GET
           cors: true
+
+  sendEmail:
+    handler: lambdas/endpoints/sendEmail.handler
+    events:
+      - http:
+          path: sendEmail
+          method: POST
+          cors: true
+
+  proxy:
+    handler: lambdas/endpoints/proxy.handler
+    events:
+      - http:
+          path: chuck-nouris/{proxy+}
+          method: ANY
+          integration: http-proxy
+          request:
+            uri: http://api.icndb.com/{proxy}
+            parameters:
+              paths:
+                proxy: true
 
 resources:
   Resources:
